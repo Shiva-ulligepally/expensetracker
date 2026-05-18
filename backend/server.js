@@ -10,8 +10,8 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
+const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, 'uploads');
+if (!process.env.VERCEL && !fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
@@ -32,7 +32,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(process.env.VERCEL ? '/tmp' : path.join(__dirname, 'uploads')));
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB connected successfully'))

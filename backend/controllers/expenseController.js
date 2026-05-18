@@ -108,7 +108,8 @@ exports.deleteExpense = async (req, res) => {
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
     
     if (expense.imageUrl) {
-        const filePath = path.join(__dirname, '..', expense.imageUrl);
+        const filename = path.basename(expense.imageUrl);
+        const filePath = process.env.VERCEL ? path.join('/tmp', filename) : path.join(__dirname, '..', expense.imageUrl);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
