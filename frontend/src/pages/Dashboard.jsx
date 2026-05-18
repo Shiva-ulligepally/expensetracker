@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { expenseService } from '../services/api';
+import { expenseService, BASE_URL } from '../services/api';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Wallet, TrendingUp, Calendar, Upload, Trash2, Edit, ChevronDown, ChevronUp, Image as ImageIcon, Search, CheckCircle, Loader2, Plus, X } from 'lucide-react';
@@ -182,7 +182,7 @@ const Dashboard = () => {
                   <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer" onClick={() => setSelectedExpense(expense)}>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-dark-700 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-gray-400">
-                        {expense.imageUrl ? <img src={`http://localhost:5000${expense.imageUrl}`} alt="bill" className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
+                        {expense.imageUrl ? <img src={`${BASE_URL}${expense.imageUrl}`} alt="bill" className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
                       </div>
                       <div>
                         <h4 className="font-semibold text-lg hover:text-primary-400 transition-colors">{expense.vendor}</h4>
@@ -253,7 +253,7 @@ const Dashboard = () => {
                   <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                     <h3 className="font-semibold mb-4 text-gray-400 uppercase tracking-wider text-sm">Receipt Image</h3>
                     {selectedExpense.imageUrl ? (
-                      <img src={`http://localhost:5000${selectedExpense.imageUrl}`} alt="receipt" className="w-full rounded-lg" />
+                      <img src={`${BASE_URL}${selectedExpense.imageUrl}`} alt="receipt" className="w-full rounded-lg" />
                     ) : (
                       <div className="h-64 flex items-center justify-center text-gray-500 bg-dark-900 rounded-lg">No Image Provided</div>
                     )}
