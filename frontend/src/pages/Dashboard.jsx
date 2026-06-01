@@ -16,6 +16,13 @@ const Dashboard = () => {
   const [editData, setEditData] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
 
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('data:')) return url;
+    if (url.startsWith('http')) return url;
+    return `${BASE_URL}${url}`;
+  };
+
   useEffect(() => {
     fetchExpenses();
   }, []);
@@ -33,11 +40,11 @@ const Dashboard = () => {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if(window.confirm('Are you sure you want to delete this expense?')) {
+    if (window.confirm('Are you sure you want to delete this expense?')) {
       try {
         await expenseService.deleteExpense(id);
         fetchExpenses();
-        if(selectedExpense && selectedExpense._id === id) {
+        if (selectedExpense && selectedExpense._id === id) {
           setSelectedExpense(null);
           setEditMode(false);
         }
@@ -60,7 +67,7 @@ const Dashboard = () => {
         dateStr = d.toISOString().substring(0, 10);
       }
     }
-    
+
     setEditData({
       vendor: expense.vendor || '',
       category: expense.category || '',
@@ -102,7 +109,7 @@ const Dashboard = () => {
       };
       await expenseService.updateExpense(selectedExpense._id, updated);
       await fetchExpenses();
-      
+
       // Update local modal data
       setSelectedExpense({ ...selectedExpense, ...updated });
       setEditMode(false);
@@ -172,7 +179,7 @@ const Dashboard = () => {
               <Link to="/upload" className="btn-primary text-sm flex items-center gap-2 whitespace-nowrap px-3 py-1.5"><Upload size={16} /> New Bill</Link>
             </div>
           </div>
-          
+
           <div className="flex-grow space-y-4">
             {expenses.length === 0 ? (
               <div className="text-center text-gray-500 py-12"><p>No expenses found. Upload or add a bill to get started!</p></div>
@@ -182,7 +189,7 @@ const Dashboard = () => {
                   <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer" onClick={() => setSelectedExpense(expense)}>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-dark-700 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-gray-400">
-                        {expense.imageUrl ? <img src={`${BASE_URL}${expense.imageUrl}`} alt="bill" className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
+                        {expense.imageUrl ? <img src={getImageUrl(expense.imageUrl)} alt="bill" className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
                       </div>
                       <div>
                         <h4 className="font-semibold text-lg hover:text-primary-400 transition-colors">{expense.vendor}</h4>
@@ -209,7 +216,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {expandedId === expense._id && (
                     <div className="bg-dark-900/50 p-4 border-t border-dark-700/50 animate-fade-in">
                       <h5 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Items Breakdown</h5>
@@ -239,34 +246,34 @@ const Dashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="glass-panel w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col relative">
             <button onClick={() => { setSelectedExpense(null); setEditMode(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-white bg-dark-800 p-2 rounded-full z-10"><X size={24} /></button>
-            
+
             <div className="p-6 border-b border-dark-700 flex justify-between items-center pr-16">
               <div>
                 <h2 className="text-2xl font-bold">{editMode ? 'Edit Expense' : selectedExpense.vendor}</h2>
                 {!editMode && <p className="text-primary-400">{selectedExpense.category} • {new Date(selectedExpense.date).toLocaleDateString()}</p>}
               </div>
             </div>
-            
+
             <div className="flex-grow overflow-y-auto p-6 flex flex-col md:flex-row gap-8">
               {!editMode && (
                 <div className="w-full md:w-5/12 space-y-6">
                   <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                     <h3 className="font-semibold mb-4 text-gray-400 uppercase tracking-wider text-sm">Receipt Image</h3>
                     {selectedExpense.imageUrl ? (
-                      <img src={`${BASE_URL}${selectedExpense.imageUrl}`} alt="receipt" className="w-full rounded-lg" />
+                      <img src={getImageUrl(selectedExpense.imageUrl)} alt="receipt" className="w-full rounded-lg" />
                     ) : (
                       <div className="h-64 flex items-center justify-center text-gray-500 bg-dark-900 rounded-lg">No Image Provided</div>
                     )}
                   </div>
                 </div>
               )}
-              
+
               <div className={`w-full ${editMode ? '' : 'md:w-7/12'} space-y-6`}>
                 {!editMode ? (
                   <div className="bg-dark-800 rounded-xl p-6 border border-dark-700 shadow-xl relative overflow-hidden h-full flex flex-col">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-accent-500"></div>
                     <h3 className="font-bold text-lg mb-6 text-center border-b border-dark-700 pb-4">Invoice Details</h3>
-                    
+
                     <div className="flex-grow overflow-y-auto pr-2">
                       {selectedExpense.items && selectedExpense.items.length > 0 ? (
                         <div className="space-y-3 mb-6">
@@ -284,7 +291,7 @@ const Dashboard = () => {
                         <p className="text-center text-gray-500 mb-6 italic">No itemized breakdown available.</p>
                       )}
                     </div>
-                    
+
                     <div className="space-y-2 text-sm mt-4">
                       {selectedExpense.tax > 0 && <div className="flex justify-between text-gray-400"><span>Tax</span><span>${selectedExpense.tax.toFixed(2)}</span></div>}
                       <div className="flex justify-between text-lg font-bold text-white pt-4 border-t border-dark-700">
@@ -294,8 +301,8 @@ const Dashboard = () => {
                     </div>
 
                     <div className="flex gap-4 mt-8">
-                      <button onClick={() => handleEditClick(selectedExpense)} className="flex-1 btn-primary py-3 flex justify-center gap-2"><Edit size={18}/> Edit Details</button>
-                      <button onClick={(e) => handleDelete(selectedExpense._id, e)} className="px-6 py-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-colors"><Trash2 size={18}/></button>
+                      <button onClick={() => handleEditClick(selectedExpense)} className="flex-1 btn-primary py-3 flex justify-center gap-2"><Edit size={18} /> Edit Details</button>
+                      <button onClick={(e) => handleDelete(selectedExpense._id, e)} className="px-6 py-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-colors"><Trash2 size={18} /></button>
                     </div>
                   </div>
                 ) : (
@@ -303,26 +310,26 @@ const Dashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                       <div className="space-y-2">
                         <label className="text-xs text-gray-400 uppercase tracking-wider">Vendor</label>
-                        <input type="text" value={editData.vendor} onChange={e => setEditData({...editData, vendor: e.target.value})} className="w-full input-field" />
+                        <input type="text" value={editData.vendor} onChange={e => setEditData({ ...editData, vendor: e.target.value })} className="w-full input-field" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs text-gray-400 uppercase tracking-wider">Date</label>
-                        <input type="date" value={editData.date} onChange={e => setEditData({...editData, date: e.target.value})} className="w-full input-field [color-scheme:dark]" />
+                        <input type="date" value={editData.date} onChange={e => setEditData({ ...editData, date: e.target.value })} className="w-full input-field [color-scheme:dark]" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs text-gray-400 uppercase tracking-wider">Category</label>
-                        <input type="text" value={editData.category} onChange={e => setEditData({...editData, category: e.target.value})} className="w-full input-field" />
+                        <input type="text" value={editData.category} onChange={e => setEditData({ ...editData, category: e.target.value })} className="w-full input-field" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs text-gray-400 uppercase tracking-wider">Tax</label>
-                        <input type="number" step="0.01" value={editData.tax} onChange={e => setEditData({...editData, tax: parseFloat(e.target.value) || 0})} className="w-full input-field" />
+                        <input type="number" step="0.01" value={editData.tax} onChange={e => setEditData({ ...editData, tax: parseFloat(e.target.value) || 0 })} className="w-full input-field" />
                       </div>
                     </div>
 
                     <div className="flex-grow flex flex-col">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold">Items</h3>
-                        <button type="button" onClick={addEditItem} className="text-sm flex items-center gap-1 text-primary-400 hover:text-primary-300"><Plus size={16}/> Add Item</button>
+                        <button type="button" onClick={addEditItem} className="text-sm flex items-center gap-1 text-primary-400 hover:text-primary-300"><Plus size={16} /> Add Item</button>
                       </div>
                       <div className="space-y-3 flex-grow overflow-y-auto pr-2 mb-4 max-h-64">
                         {editData.items.map((item, idx) => (
@@ -330,11 +337,11 @@ const Dashboard = () => {
                             <input type="text" value={item.name} placeholder="Item" onChange={e => handleEditItemChange(idx, 'name', e.target.value)} className="w-full input-field py-1 text-sm" />
                             <input type="number" min="1" value={item.quantity || 1} onChange={e => handleEditItemChange(idx, 'quantity', parseFloat(e.target.value) || 1)} className="w-16 input-field py-1 text-sm" />
                             <input type="number" step="0.01" value={item.price || 0} onChange={e => handleEditItemChange(idx, 'price', parseFloat(e.target.value) || 0)} className="w-20 input-field py-1 text-sm" />
-                            <button type="button" onClick={() => removeEditItem(idx)} className="text-gray-500 hover:text-red-400 p-1"><Trash2 size={16}/></button>
+                            <button type="button" onClick={() => removeEditItem(idx)} className="text-gray-500 hover:text-red-400 p-1"><Trash2 size={16} /></button>
                           </div>
                         ))}
                       </div>
-                      
+
                       <div className="flex justify-between items-center bg-dark-900 p-4 rounded-xl mb-6">
                         <span className="text-gray-300">Total Calculated</span>
                         <span className="text-2xl font-bold text-primary-400">${calculateEditTotal().toFixed(2)}</span>
@@ -344,7 +351,7 @@ const Dashboard = () => {
                     <div className="flex justify-end gap-4 pt-4 border-t border-dark-700">
                       <button onClick={() => setEditMode(false)} className="px-6 py-2 rounded-xl text-white hover:bg-dark-700 transition-colors">Cancel</button>
                       <button onClick={saveEdit} disabled={editLoading} className={`btn-primary flex items-center gap-2 px-8 ${editLoading ? 'opacity-50' : ''}`}>
-                        {editLoading ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18}/>} Save Changes
+                        {editLoading ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Save Changes
                       </button>
                     </div>
                   </div>

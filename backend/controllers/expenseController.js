@@ -1,7 +1,5 @@
 const Expense = require('../models/Expense');
 const { extractBillData } = require('../services/aiService');
-const path = require('path');
-const fs = require('fs');
 
 exports.uploadBill = async (req, res) => {
   try {
@@ -9,11 +7,11 @@ exports.uploadBill = async (req, res) => {
       return res.status(400).json({ error: 'No image provided' });
     }
 
-    const imagePath = req.file.path;
+    const imageBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
 
-    const extractedData = await extractBillData(imagePath, mimeType);
-    
+    const extractedData = await extractBillData(imageBuffer, mimeType);
+
     let expenseDate = new Date();
     if (extractedData.date) {
       const parsedDate = new Date(extractedData.date);
@@ -33,7 +31,7 @@ exports.uploadBill = async (req, res) => {
       date: expenseDate,
       currency: extractedData.currency || 'USD',
       location: extractedData.location || '',
-      imageUrl: `/uploads/${req.file.filename}`,
+      imageUrl: `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       items: extractedData.items || [],
       extractedText: extractedData
     });
@@ -41,15 +39,21 @@ exports.uploadBill = async (req, res) => {
     const savedExpense = await newExpense.save();
     res.status(201).json(savedExpense);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error during upload and processing' });
+    console.error("Upload Error:", error.message);
+    if (error.message.includes('Quota Exceeded')) {
+      return res.status(429).json({ error: error.message });
+    }
+    if (error.message.includes('Permission Denied')) {
+      return res.status(403).json({ error: error.message });
+    }
+    res.status(500).json({ error: error.message || 'Server error during upload and processing' });
   }
 };
 
 exports.createManualExpense = async (req, res) => {
   try {
     const { vendor, category, date, items, tax, totalAmount } = req.body;
-    
+
     const newExpense = new Expense({
       title: 'Manual Entry',
       vendor: vendor || 'Unknown Vendor',
@@ -106,14 +110,6 @@ exports.deleteExpense = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
-    
-    if (expense.imageUrl) {
-        const filename = path.basename(expense.imageUrl);
-        const filePath = process.env.VERCEL ? path.join('/tmp', filename) : path.join(__dirname, '..', expense.imageUrl);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-        }
-    }
 
     await expense.deleteOne();
     res.json({ message: 'Expense deleted successfully' });

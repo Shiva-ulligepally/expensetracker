@@ -71,7 +71,8 @@ const UploadBill = () => {
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error(err);
-      setUploadError('Failed to process the bill. Make sure your API keys are correct.');
+      const errorMessage = err.response?.data?.error || 'Failed to process the bill. Make sure your API keys are correct.';
+      setUploadError(errorMessage);
     } finally {
       setUploadLoading(false);
     }
