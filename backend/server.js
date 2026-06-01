@@ -62,7 +62,7 @@ app.get('/api', (req, res) => res.send('API running'));
 app.use('/api/expenses', expenseRoutes);
 app.use('/expenses', expenseRoutes);
 
-if (!process.env.VERCEL) {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
