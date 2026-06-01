@@ -19,6 +19,15 @@ const Dashboard = () => {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('data:')) return url;
+    
+    // Convert any old localhost/127.0.0.1 image URLs to relative paths to prevent Mixed Content errors
+    if (url.includes('localhost:5000') || url.includes('127.0.0.1:5000')) {
+      const parts = url.split('/uploads/');
+      if (parts[1]) {
+        return `${BASE_URL}/uploads/${parts[1]}`;
+      }
+    }
+    
     if (url.startsWith('http')) return url;
     return `${BASE_URL}${url}`;
   };

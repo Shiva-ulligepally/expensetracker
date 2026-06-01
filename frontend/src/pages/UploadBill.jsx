@@ -71,7 +71,7 @@ const UploadBill = () => {
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.error || 'Failed to process the bill. Make sure your API keys are correct.';
+      const errorMessage = err.response?.data?.details || err.response?.data?.error || err.message || 'Failed to process the bill. Make sure your API keys are correct.';
       setUploadError(errorMessage);
     } finally {
       setUploadLoading(false);
@@ -123,7 +123,8 @@ const UploadBill = () => {
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error(err);
-      setManualError('Failed to save expense.');
+      const msg = err.response?.data?.details || err.response?.data?.error || err.message || 'Failed to save expense.';
+      setManualError(msg);
     } finally {
       setManualLoading(false);
     }

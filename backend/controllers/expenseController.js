@@ -68,8 +68,8 @@ exports.createManualExpense = async (req, res) => {
     const savedExpense = await newExpense.save();
     res.status(201).json(savedExpense);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to create manual expense' });
+    console.error("Manual Expense Error:", error);
+    res.status(500).json({ error: 'Failed to create manual expense', details: error.message });
   }
 };
 
@@ -78,7 +78,8 @@ exports.getAllExpenses = async (req, res) => {
     const expenses = await Expense.find().sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch expenses' });
+    console.error("Get All Expenses Error:", error);
+    res.status(500).json({ error: 'Failed to fetch expenses', details: error.message });
   }
 };
 
@@ -88,7 +89,8 @@ exports.getExpenseById = async (req, res) => {
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
     res.json(expense);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch expense' });
+    console.error("Get Expense By Id Error:", error);
+    res.status(500).json({ error: 'Failed to fetch expense', details: error.message });
   }
 };
 
@@ -102,7 +104,8 @@ exports.updateExpense = async (req, res) => {
     if (!updatedExpense) return res.status(404).json({ error: 'Expense not found' });
     res.json(updatedExpense);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update expense' });
+    console.error("Update Expense Error:", error);
+    res.status(500).json({ error: 'Failed to update expense', details: error.message });
   }
 };
 
@@ -114,7 +117,7 @@ exports.deleteExpense = async (req, res) => {
     await expense.deleteOne();
     res.json({ message: 'Expense deleted successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete expense' });
+    console.error("Delete Expense Error:", error);
+    res.status(500).json({ error: 'Failed to delete expense', details: error.message });
   }
 };
