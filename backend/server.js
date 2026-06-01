@@ -17,13 +17,37 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+  origin: function (origin, callback) {
+
+    console.log("Request Origin:", origin);
+
+    // Allow requests without origin
+    if (!origin) {
+      return callback(null, true);
     }
+
+    // Allow localhost
+    if (
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+
+    // Allow ALL Vercel deployments
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Allow configured frontend URL
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log("Blocked Origin:", origin);
+    return callback(new Error('Not allowed by CORS'));
   },
+
   credentials: true
 }));
 app.use(express.json());
